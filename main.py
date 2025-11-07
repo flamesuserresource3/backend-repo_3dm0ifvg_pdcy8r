@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
 
@@ -12,13 +13,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+class ContactPayload(BaseModel):
+    name: str
+    email: EmailStr
+    company: str | None = None
+    projectType: str
+    message: str
+
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from FastAPI Backend!"}
 
+
 @app.get("/api/hello")
 def hello():
     return {"message": "Hello from the backend API!"}
+
+
+@app.post("/api/contact")
+async def contact(payload: ContactPayload):
+    # For demo purposes just log the payload. In production, send to CRM/email.
+    print("[CONTACT]", payload.dict())
+    return {"ok": True}
+
 
 @app.get("/test")
 def test_database():
